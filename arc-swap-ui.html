@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Arc Simple Swap — Testnet Demo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0A0E12;
+    --panel: #12171D;
+    --panel-2: #161C23;
+    --line: #232B33;
+    --text-hi: #ECEFF3;
+    --text-lo: #8B94A0;
+    --amber: #F2A93B;
+    --amber-dim: #7A5B22;
+    --teal: #35D0BA;
+    --red: #F26B5B;
+    --green: #2FD98A;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--ink);
+    color: var(--text-hi);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(242,169,59,0.06), transparent 45%),
+      radial-gradient(circle at 85% 20%, rgba(53,208,186,0.05), transparent 40%);
+    min-height: 100vh;
+    padding: 24px 16px 64px;
+  }
+
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 28px;
+    animation: rise 0.5s ease both;
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .brand h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .brand .mark {
+    color: var(--amber);
+  }
+
+  .brand-sub {
+    font-size: 13px;
+    color: var(--text-lo);
+    margin-top: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .wallet-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text-lo);
+  }
+
+  .chip .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--text-lo);
+  }
+  .chip.ok .dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .chip.warn .dot { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+
+  button {
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 999px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--amber);
+    color: #17130A;
+    transition: transform 0.12s ease, background 0.2s ease, opacity 0.2s ease;
+  }
+  .btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn.secondary {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-hi);
+  }
+
+  /* Disclosure banner */
+  .disclosure {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: rgba(242,169,59,0.06);
+    border: 1px solid var(--amber-dim);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-lo);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .disclosure strong { color: var(--amber); font-weight: 600; }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 820px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  /* Ticket card */
+  .ticket {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+    position: relative;
+    animation: rise 0.55s ease 0.05s both;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    background: var(--panel-2);
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    width: fit-content;
+  }
+  .tab {
+    border: none;
+    background: transparent;
+    color: var(--text-lo);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-family: 'IBM Plex Mono', monospace;
+    transition: background 0.2s, color 0.2s;
+  }
+  .tab.active {
+    background: var(--amber);
+    color: #17130A;
+  }
+
+  .field-label {
+    font-size: 12px;
+    color: var(--text-lo);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .field-label button {
+    background: none; border: none; color: var(--teal); font-family: inherit; font-size: 12px; padding: 0;
+  }
+
+  .amount-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+  }
+  .amount-row input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-hi);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    min-width: 0;
+  }
+  .token-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  .swap-arrow {
+    display: flex;
+    justify-content: center;
+    margin: -8px 0 10px;
+  }
+  .swap-arrow span {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--teal);
+    font-size: 14px;
+  }
+
+  .out-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--panel-2);
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+  }
+  .out-row .val {
+    flex: 1;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    color: var(--teal);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .fee-note {
+    font-size: 12px;
+    color: var(--text-lo);
+    margin-bottom: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .action-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    background: var(--amber);
+    color: #17130A;
+    transition: opacity 0.2s, transform 0.12s;
+  }
+  .action-btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .action-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+  .status-line {
+    margin-top: 12px;
+    font-size: 13px;
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 18px;
+  }
+  .status-line.err { color: var(--red); }
+  .status-line.ok { color: var(--green); }
+  .status-line.pending { color: var(--amber); }
+
+  .tear {
+    border-top: 1px dashed var(--line);
+    margin: 20px 0 14px;
+  }
+
+  .fine-print {
+    font-size: 11px;
+    color: var(--text-lo);
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1.6;
+    word-break: break-all;
+  }
+  .fine-print b { color: var(--amber); }
+
+  /* Pool panel */
+  .pool {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+    animation: rise 0.55s ease 0.1s both;
+  }
+  .pool h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    margin: 0 0 16px;
+    font-weight: 600;
+  }
+
+  .reserve-bar {
+    display: flex;
+    height: 34px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    margin-bottom: 8px;
+  }
+  .reserve-bar .segA { background: var(--amber); }
+  .reserve-bar .segB { background: var(--teal); }
+
+  .reserve-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-lo);
+    margin-bottom: 22px;
+  }
+  .reserve-labels .a { color: var(--amber); }
+  .reserve-labels .b { color: var(--teal); }
+
+  .price-line {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--text-hi);
+    margin-bottom: 4px;
+  }
+  .price-line span { color: var(--text-lo); }
+
+  .curve-wrap {
+    margin: 20px 0 22px;
+  }
+  .curve-caption {
+    font-size: 11px;
+    color: var(--text-lo);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 6px;
+  }
+
+  .addr-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .addr-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+  }
+  .addr-item .role { color: var(--text-lo); flex-shrink: 0; }
+  .addr-item a { color: var(--text-hi); text-decoration: none; }
+  .addr-item a:hover { color: var(--teal); }
+  .addr-item .copy {
+    background: none; border: none; color: var(--text-lo); font-size: 12px; padding: 2px;
+  }
+  .addr-item .copy:hover { color: var(--amber); }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="brand">
+        <h1><span class="mark">Arc</span> Simple Swap</h1>
+      </div>
+      <div class="brand-sub">constant-product demo AMM · chain 5042002 · by otisdefi</div>
+    </div>
+    <div class="wallet-box">
+      <span id="networkChip" class="chip warn"><span class="dot"></span> ağa bağlı değil</span>
+      <button class="btn" id="connectBtn">Cüzdanı bağla</button>
+    </div>
+  </header>
+
+  <div class="disclosure">
+    <span>⚠</span>
+    <span><strong>Denetlenmemiş demo kontrat.</strong> Bu sözleşme yalnızca Arc Testnet üzerinde eğitim/gösterim amaçlıdır, bağımsız bir güvenlik denetiminden geçmemiştir. Mainnet'te veya gerçek değerli varlıklarla kullanılmamalıdır.</span>
+  </div>
+
+  <div class="grid">
+
+    <!-- Swap ticket -->
+    <div class="ticket">
+      <div class="tabs">
+        <button class="tab active" id="tabAB">TKA → TKB</button>
+        <button class="tab" id="tabBA">TKB → TKA</button>
+      </div>
+
+      <div class="field-label">
+        <span>Veriyorsunuz</span>
+        <button id="maxBtn">MAKS</button>
+      </div>
+      <div class="amount-row">
+        <input id="amountIn" type="text" inputmode="decimal" placeholder="0.0" autocomplete="off" />
+        <span class="token-tag" id="inTag">TKA</span>
+      </div>
+
+      <div class="swap-arrow"><span>↓</span></div>
+
+      <div class="field-label"><span>Alıyorsunuz (tahmini)</span></div>
+      <div class="out-row">
+        <span class="val" id="amountOut">0.0</span>
+        <span class="token-tag" id="outTag">TKB</span>
+      </div>
+      <div class="fee-note">Havuz ücreti: %0.30 · Bakiye: <span id="balanceLine">—</span></div>
+
+      <button class="action-btn" id="actionBtn" disabled>Cüzdanı bağlayın</button>
+      <div class="status-line" id="statusLine"></div>
+
+      <div class="tear"></div>
+      <div class="fine-print">
+        <b>SimpleSwap</b> 0x56Ee3AD055121CD74d28fCc05B1e0dB4257936C7<br/>
+        x·y = k formülüyle çalışan iki token'lı sabit havuz. Testnet demo amaçlıdır.
+      </div>
+    </div>
+
+    <!-- Pool panel -->
+    <div class="pool">
+      <h2>Havuz durumu</h2>
+
+      <div class="reserve-bar">
+        <div class="segA" id="segA" style="width:50%"></div>
+        <div class="segB" id="segB" style="width:50%"></div>
+      </div>
+      <div class="reserve-labels">
+        <span class="a" id="reserveALabel">— TKA</span>
+        <span class="b" id="reserveBLabel">— TKB</span>
+      </div>
+
+      <div class="price-line"><span>1 TKA ≈</span> <span id="priceAB">—</span> <span>TKB</span></div>
+      <div class="price-line"><span>1 TKB ≈</span> <span id="priceBA">—</span> <span>TKA</span></div>
+
+      <div class="curve-wrap">
+        <svg id="curveSvg" viewBox="0 0 260 160" width="100%" height="160"></svg>
+        <div class="curve-caption">x·y = k eğrisi üzerinde havuzun anlık konumu (turuncu) ve girdiğiniz miktarın öngörülen sonucu (turkuaz).</div>
+      </div>
+
+      <div class="addr-list">
+        <div class="addr-item">
+          <span class="role">TokenA (TKA)</span>
+          <a href="https://testnet.arcscan.app/address/0xf82C2704053b4db27Dbb213Ff271A819cA1E2910" target="_blank" rel="noopener">0xf82C…E2910</a>
+          <button class="copy" data-copy="0xf82C2704053b4db27Dbb213Ff271A819cA1E2910">⧉</button>
+        </div>
+        <div class="addr-item">
+          <span class="role">TokenB (TKB)</span>
+          <a href="https://testnet.arcscan.app/address/0xEA92710a0Ab738dEFaadbb307af9641A5cE2C493" target="_blank" rel="noopener">0xEA92…2C493</a>
+          <button class="copy" data-copy="0xEA92710a0Ab738dEFaadbb307af9641A5cE2C493">⧉</button>
+        </div>
+        <div class="addr-item">
+          <span class="role">SimpleSwap</span>
+          <a href="https://testnet.arcscan.app/address/0x56Ee3AD055121CD74d28fCc05B1e0dB4257936C7" target="_blank" rel="noopener">0x56Ee…36C7</a>
+          <button class="copy" data-copy="0x56Ee3AD055121CD74d28fCc05B1e0dB4257936C7">⧉</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  const TOKEN_A = "0xf82C2704053b4db27Dbb213Ff271A819cA1E2910";
+  const TOKEN_B = "0xEA92710a0Ab738dEFaadbb307af9641A5cE2C493";
+  const SWAP = "0x56Ee3AD055121CD74d28fCc05B1e0dB4257936C7";
+  const CHAIN_ID_HEX = "0x4cef52"; // 5042002
+  const CHAIN_PARAMS = {
+    chainId: CHAIN_ID_HEX,
+    chainName: "Arc Testnet",
+    nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
+    rpcUrls: ["https://5042002.rpc.thirdweb.com"],
+    blockExplorerUrls: ["https://testnet.arcscan.app"]
+  };
+  const FEE_BPS = 30n;
+  const BPS = 10000n;
+
+  const ERC20_ABI = [
+    "function balanceOf(address) view returns (uint256)",
+    "function approve(address,uint256) returns (bool)",
+    "function allowance(address,address) view returns (uint256)",
+    "function symbol() view returns (string)"
+  ];
+  const SWAP_ABI = [
+    "function reserveA() view returns (uint256)",
+    "function reserveB() view returns (uint256)",
+    "function swapAForB(uint256,uint256) returns (uint256)",
+    "function swapBForA(uint256,uint256) returns (uint256)"
+  ];
+
+  let provider, signer, userAddress;
+  let direction = "AB"; // AB = TKA->TKB, BA = TKB->TKA
+  let reserveA = 0n, reserveB = 0n;
+  let balanceIn = 0n, allowanceIn = 0n;
+
+  const el = (id) => document.getElementById(id);
+  const connectBtn = el("connectBtn");
+  const networkChip = el("networkChip");
+  const tabAB = el("tabAB"), tabBA = el("tabBA");
+  const amountIn = el("amountIn");
+  const amountOut = el("amountOut");
+  const inTag = el("inTag"), outTag = el("outTag");
+  const balanceLine = el("balanceLine");
+  const actionBtn = el("actionBtn");
+  const statusLine = el("statusLine");
+  const maxBtn = el("maxBtn");
+
+  function fmt(bn, decimals = 18, maxFrac = 4) {
+    const s = ethers.utils.formatUnits(bn, decimals);
+    const num = parseFloat(s);
+    if (isNaN(num)) return "0";
+    return num.toLocaleString("en-US", { maximumFractionDigits: maxFrac });
+  }
+
+  function parseInput(str) {
+    if (!str) return 0n;
+    try {
+      return ethers.utils.parseUnits(str, 18);
+    } catch (e) {
+      return 0n;
+    }
+  }
+
+  function setStatus(msg, kind) {
+    statusLine.textContent = msg || "";
+    statusLine.className = "status-line" + (kind ? " " + kind : "");
+  }
+
+  function tokenInAddr() { return direction === "AB" ? TOKEN_A : TOKEN_B; }
+  function tokenOutAddr() { return direction === "AB" ? TOKEN_B : TOKEN_A; }
+
+  function getAmountOut(amtIn, resIn, resOut) {
+    if (resIn === 0n || resOut === 0n || amtIn === 0n) return 0n;
+    const amtInWithFee = amtIn * (BPS - FEE_BPS);
+    const numerator = amtInWithFee * resOut;
+    const denominator = resIn * BPS + amtInWithFee;
+    return numerator / denominator;
+  }
+
+  function updateTabsUI() {
+    tabAB.classList.toggle("active", direction === "AB");
+    tabBA.classList.toggle("active", direction === "BA");
+    inTag.textContent = direction === "AB" ? "TKA" : "TKB";
+    outTag.textContent = direction === "AB" ? "TKB" : "TKA";
+  }
+
+  function drawCurve(previewAmtIn, previewAmtOut) {
+    const svg = el("curveSvg");
+    const resIn = direction === "AB" ? reserveA : reserveB;
+    const resOut = direction === "AB" ? reserveB : reserveA;
+    const xIn = parseFloat(ethers.utils.formatUnits(resIn, 18)) || 1;
+    const yIn = parseFloat(ethers.utils.formatUnits(resOut, 18)) || 1;
+    const k = xIn * yIn;
+
+    const pad = 24;
+    const W = 260, H = 160;
+    const xMax = xIn * 2.4 || 10;
+    const yMax = k / (xMax * 0.15) || 10;
+
+    function toSvgX(x) { return pad + (x / xMax) * (W - pad * 1.4); }
+    function toSvgY(y) { return H - pad - (y / yMax) * (H - pad * 1.6); }
+
+    let path = "";
+    const steps = 40;
+    for (let i = 1; i <= steps; i++) {
+      const x = (xMax * 0.06) + (i / steps) * (xMax * 0.94);
+      const y = k / x;
+      const px = toSvgX(x), py = toSvgY(y);
+      path += (i === 1 ? "M" : "L") + px.toFixed(1) + "," + py.toFixed(1) + " ";
+    }
+
+    const curPx = toSvgX(xIn), curPy = toSvgY(yIn);
+
+    let previewMarker = "";
+    if (previewAmtIn && previewAmtIn > 0n) {
+      const newX = xIn + parseFloat(ethers.utils.formatUnits(previewAmtIn, 18));
+      const newY = yIn - parseFloat(ethers.utils.formatUnits(previewAmtOut, 18));
+      const px = toSvgX(newX), py = toSvgY(Math.max(newY, 0.0001));
+      previewMarker = `<circle cx="${px}" cy="${py}" r="4.5" fill="#35D0BA" stroke="#0A0E12" stroke-width="1.5"/>`;
+    }
+
+    svg.innerHTML = `
+      <path d="${path}" fill="none" stroke="#F2A93B" stroke-width="1.6" opacity="0.85"/>
+      <line x1="${pad}" y1="${H-pad}" x2="${W-8}" y2="${H-pad}" stroke="#232B33" stroke-width="1"/>
+      <line x1="${pad}" y1="8" x2="${pad}" y2="${H-pad}" stroke="#232B33" stroke-width="1"/>
+      <circle cx="${curPx}" cy="${curPy}" r="5" fill="#F2A93B" stroke="#0A0E12" stroke-width="1.5"/>
+      ${previewMarker}
+    `;
+  }
+
+  function updatePoolPanel() {
+    const totalNum = parseFloat(ethers.utils.formatUnits(reserveA, 18)) + parseFloat(ethers.utils.formatUnits(reserveB, 18));
+    const pctA = totalNum > 0 ? (parseFloat(ethers.utils.formatUnits(reserveA, 18)) / totalNum) * 100 : 50;
+    el("segA").style.width = pctA + "%";
+    el("segB").style.width = (100 - pctA) + "%";
+    el("reserveALabel").textContent = fmt(reserveA) + " TKA";
+    el("reserveBLabel").textContent = fmt(reserveB) + " TKB";
+
+    if (reserveA > 0n && reserveB > 0n) {
+      const priceAB = getAmountOut(ethers.utils.parseUnits("1", 18), reserveA, reserveB);
+      const priceBA = getAmountOut(ethers.utils.parseUnits("1", 18), reserveB, reserveA);
+      el("priceAB").textContent = fmt(priceAB, 18, 6);
+      el("priceBA").textContent = fmt(priceBA, 18, 6);
+    }
+    drawCurve(null, null);
+  }
+
+  async function refreshChainState() {
+    if (!provider) return;
+    const net = await provider.getNetwork();
+    const chainIdHex = "0x" + net.chainId.toString(16);
+    const onArc = chainIdHex.toLowerCase() === CHAIN_ID_HEX.toLowerCase();
+    networkChip.className = "chip " + (onArc ? "ok" : "warn");
+    networkChip.innerHTML = `<span class="dot"></span> ${onArc ? "Arc Testnet" : "yanlış ağ"}`;
+    return onArc;
+  }
+
+  async function refreshBalancesAndReserves() {
+    if (!provider) return;
+    const swapC = new ethers.Contract(SWAP, SWAP_ABI, provider);
+    [reserveA, reserveB] = await Promise.all([
+      swapC.reserveA().then(BigInt),
+      swapC.reserveB().then(BigInt)
+    ]);
+    updatePoolPanel();
+
+    if (userAddress) {
+      const tokenIn = new ethers.Contract(tokenInAddr(), ERC20_ABI, provider);
+      [balanceIn, allowanceIn] = await Promise.all([
+        tokenIn.balanceOf(userAddress).then(BigInt),
+        tokenIn.allowance(userAddress, SWAP).then(BigInt)
+      ]);
+      balanceLine.textContent = fmt(balanceIn) + " " + inTag.textContent;
+    }
+    recompute();
+  }
+
+  function recompute() {
+    const amtIn = parseInput(amountIn.value);
+    const resIn = direction === "AB" ? reserveA : reserveB;
+    const resOut = direction === "AB" ? reserveB : reserveA;
+    const out = getAmountOut(amtIn, resIn, resOut);
+    amountOut.textContent = fmt(out, 18, 6);
+    drawCurve(amtIn, out);
+    updateActionButton(amtIn);
+  }
+
+  function updateActionButton(amtIn) {
+    if (!userAddress) {
+      actionBtn.textContent = "Cüzdanı bağlayın";
+      actionBtn.disabled = true;
+      return;
+    }
+    if (!amtIn || amtIn === 0n) {
+      actionBtn.textContent = "Miktar girin";
+      actionBtn.disabled = true;
+      return;
+    }
+    if (amtIn > balanceIn) {
+      actionBtn.textContent = "Yetersiz " + inTag.textContent + " bakiyesi";
+      actionBtn.disabled = true;
+      return;
+    }
+    if (allowanceIn < amtIn) {
+      actionBtn.textContent = inTag.textContent + " için onay ver (approve)";
+      actionBtn.disabled = false;
+      actionBtn.dataset.mode = "approve";
+      return;
+    }
+    actionBtn.textContent = "Swap yap";
+    actionBtn.disabled = false;
+    actionBtn.dataset.mode = "swap";
+  }
+
+  async function connect() {
+    if (!window.ethereum) {
+      setStatus("Tarayıcınızda bir cüzdan uzantısı bulunamadı.", "err");
+      return;
+    }
+    try {
+      provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+      await provider.send("eth_requestAccounts", []);
+
+      const onArc = await refreshChainState();
+      if (!onArc) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: CHAIN_ID_HEX }]
+          });
+        } catch (switchErr) {
+          if (switchErr.code === 4902) {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [CHAIN_PARAMS]
+            });
+          } else {
+            throw switchErr;
+          }
+        }
+        await refreshChainState();
+      }
+
+      signer = provider.getSigner();
+      userAddress = await signer.getAddress();
+      connectBtn.textContent = userAddress.slice(0, 6) + "…" + userAddress.slice(-4);
+      connectBtn.disabled = true;
+
+      await refreshBalancesAndReserves();
+      setStatus("");
+
+      window.ethereum.on("accountsChanged", () => window.location.reload());
+      window.ethereum.on("chainChanged", () => window.location.reload());
+    } catch (e) {
+      setStatus(e.message || "Bağlantı başarısız oldu.", "err");
+    }
+  }
+
+  async function handleAction() {
+    const mode = actionBtn.dataset.mode;
+    const amtIn = parseInput(amountIn.value);
+    if (!mode || !amtIn) return;
+
+    actionBtn.disabled = true;
+    try {
+      if (mode === "approve") {
+        setStatus("Onay işlemi cüzdanda bekleniyor…", "pending");
+        const tokenC = new ethers.Contract(tokenInAddr(), ERC20_ABI, signer);
+        const tx = await tokenC.approve(SWAP, ethers.constants.MaxUint256);
+        setStatus("Onay işlemi ağda doğrulanıyor…", "pending");
+        await tx.wait();
+        setStatus("Onay tamamlandı.", "ok");
+      } else {
+        setStatus("Swap işlemi cüzdanda bekleniyor…", "pending");
+        const swapC = new ethers.Contract(SWAP, SWAP_ABI, signer);
+        const minOut = 0; // demo: slipaj koruması kapalı
+        const tx = direction === "AB"
+          ? await swapC.swapAForB(amtIn, minOut)
+          : await swapC.swapBForA(amtIn, minOut);
+        setStatus("Swap işlemi ağda doğrulanıyor…", "pending");
+        await tx.wait();
+        setStatus("Swap tamamlandı.", "ok");
+        amountIn.value = "";
+      }
+      await refreshBalancesAndReserves();
+    } catch (e) {
+      const msg = (e && e.error && e.error.message) || e.message || "İşlem başarısız oldu.";
+      setStatus(msg, "err");
+    } finally {
+      recompute();
+    }
+  }
+
+  // Wire up events
+  connectBtn.addEventListener("click", connect);
+  actionBtn.addEventListener("click", handleAction);
+  amountIn.addEventListener("input", recompute);
+  maxBtn.addEventListener("click", () => {
+    amountIn.value = ethers.utils.formatUnits(balanceIn, 18);
+    recompute();
+  });
+  tabAB.addEventListener("click", () => {
+    direction = "AB"; updateTabsUI(); amountIn.value = "";
+    refreshBalancesAndReserves();
+  });
+  tabBA.addEventListener("click", () => {
+    direction = "BA"; updateTabsUI(); amountIn.value = "";
+    refreshBalancesAndReserves();
+  });
+  document.querySelectorAll(".copy").forEach(btn => {
+    btn.addEventListener("click", () => {
+      navigator.clipboard.writeText(btn.dataset.copy);
+      const orig = btn.textContent;
+      btn.textContent = "✓";
+      setTimeout(() => btn.textContent = orig, 1200);
+    });
+  });
+
+  // Initial render (read-only, no wallet needed)
+  updateTabsUI();
+  drawCurve(null, null);
+
+  // Try a read-only provider so pool state shows even before connecting
+  (async function initReadOnly() {
+    try {
+      const ro = new ethers.providers.JsonRpcProvider(CHAIN_PARAMS.rpcUrls[0]);
+      const swapC = new ethers.Contract(SWAP, SWAP_ABI, ro);
+      [reserveA, reserveB] = await Promise.all([
+        swapC.reserveA().then(BigInt),
+        swapC.reserveB().then(BigInt)
+      ]);
+      updatePoolPanel();
+    } catch (e) {
+      // sessizce yut — cüzdan bağlanınca zaten tekrar denenecek
+    }
+  })();
+})();
+</script>
+</body>
+</html>
