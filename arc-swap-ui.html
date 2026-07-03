@@ -2,28 +2,35 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
 <title>Arc Simple Swap — Testnet Demo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #0A0E12;
-    --panel: #12171D;
-    --panel-2: #161C23;
-    --line: #232B33;
-    --text-hi: #ECEFF3;
-    --text-lo: #8B94A0;
-    --amber: #F2A93B;
-    --amber-dim: #7A5B22;
-    --teal: #35D0BA;
-    --red: #F26B5B;
-    --green: #2FD98A;
-    --radius: 10px;
+    --bg: #F6F7F9;
+    --card: #FFFFFF;
+    --card-soft: #F5F6F8;
+    --line: #E7E9ED;
+    --text-hi: #14161A;
+    --text-lo: #767C88;
+    --accent: #5B5FEF;
+    --accent-hover: #4B4FE0;
+    --accent-soft: #EEF0FE;
+    --mint: #12B79E;
+    --mint-soft: #E7F9F6;
+    --red: #E1355A;
+    --red-soft: #FCEAEF;
+    --amber: #B4740E;
+    --amber-soft: #FBF1DE;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --shadow: 0 1px 2px rgba(20,22,26,0.04), 0 8px 24px rgba(20,22,26,0.06);
   }
 
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
@@ -32,9 +39,642 @@
   html, body {
     margin: 0;
     padding: 0;
-    background: var(--ink);
+    background: var(--bg);
     color: var(--text-hi);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    min-height: 100vh;
+    padding: 20px 14px 48px;
+  }
+
+  button, input { font-family: inherit; }
+
+  .wrap {
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    row-gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand .logo {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 15px;
+    font-family: 'IBM Plex Mono', monospace;
+    flex-shrink: 0;
+  }
+  .brand-text h1 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .brand-text .sub {
+    font-size: 11px;
+    color: var(--text-lo);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--text-lo);
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-lo); }
+  .chip.ok { color: var(--mint); border-color: #C9EFE9; background: var(--mint-soft); }
+  .chip.ok .dot { background: var(--mint); }
+  .chip.warn { color: var(--amber); border-color: #EFDFB6; background: var(--amber-soft); }
+  .chip.warn .dot { background: var(--amber); }
+
+  #connectBtn {
+    border: none;
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  #connectBtn:hover:not(:disabled) { background: var(--accent-hover); }
+  #connectBtn:active:not(:disabled) { transform: scale(0.97); }
+  #connectBtn:disabled { background: var(--accent-soft); color: var(--accent); cursor: default; }
+
+  /* Disclosure banner */
+  .disclosure {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    background: var(--amber-soft);
+    border: 1px solid #EFDFB6;
+    border-radius: var(--radius-sm);
+    padding: 10px 13px;
+    font-size: 12px;
+    color: #8A5E14;
+    margin-bottom: 16px;
+    line-height: 1.45;
+  }
+  .disclosure strong { color: #6B4710; }
+
+  /* Swap card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+    background: var(--card-soft);
+    padding: 4px;
+    border-radius: 999px;
+  }
+  .tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-lo);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 8px;
+    border-radius: 999px;
+    font-family: 'IBM Plex Mono', monospace;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+  }
+  .tab.active {
+    background: var(--text-hi);
+    color: #fff;
+  }
+
+  .field {
+    background: var(--card-soft);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    padding: 14px;
+    transition: border-color 0.15s;
+  }
+  .field:focus-within { border-color: var(--accent); }
+
+  .field-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .field-top .label {
+    font-size: 12px;
+    color: var(--text-lo);
+    font-weight: 600;
+  }
+  .field-top button {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 6px;
+    cursor: pointer;
+  }
+
+  .field-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .field-row input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-hi);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 24px;
+    font-weight: 600;
+    min-width: 0;
+    padding: 0;
+  }
+  .field-row input::placeholder { color: #C6CAD2; }
+  .field-row .val {
+    flex: 1;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-hi);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .token-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    background: #fff;
+    border: 1px solid var(--line);
+    padding: 7px 12px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  .swap-arrow {
+    display: flex;
+    justify-content: center;
+    margin: -12px 0;
+    position: relative;
+    z-index: 2;
+  }
+  .swap-arrow span {
+    width: 34px; height: 34px;
+    border-radius: 11px;
+    background: #fff;
+    border: 4px solid var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(20,22,26,0.08);
+  }
+
+  .fee-note {
+    font-size: 11.5px;
+    color: var(--text-lo);
+    margin: 12px 2px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  #actionBtn {
+    width: 100%;
+    padding: 15px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.08s ease, opacity 0.15s;
+    min-height: 52px;
+  }
+  #actionBtn:hover:not(:disabled) { background: var(--accent-hover); }
+  #actionBtn:active:not(:disabled) { transform: scale(0.98); }
+  #actionBtn:disabled { background: var(--card-soft); color: #B6BAC3; cursor: not-allowed; }
+
+  .status-line {
+    margin-top: 10px;
+    font-size: 12.5px;
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 16px;
+    text-align: center;
+  }
+  .status-line.err { color: var(--red); }
+  .status-line.ok { color: var(--mint); }
+  .status-line.pending { color: var(--amber); }
+
+  .card-footnote {
+    font-size: 10.5px;
+    color: var(--text-lo);
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1.6;
+    word-break: break-all;
+    border-top: 1px solid var(--line);
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+  .card-footnote b { color: var(--text-hi); }
+
+  /* Pool card */
+  .pool h2 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 14px;
+  }
+
+  .reserve-bar {
+    display: flex;
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--card-soft);
+    margin-bottom: 8px;
+  }
+  .reserve-bar .segA { background: var(--accent); }
+  .reserve-bar .segB { background: var(--mint); }
+
+  .reserve-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-lo);
+    margin-bottom: 18px;
+  }
+  .reserve-labels .a { color: var(--accent); font-weight: 600; }
+  .reserve-labels .b { color: var(--mint); font-weight: 600; }
+
+  .price-line {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text-hi);
+    margin-bottom: 4px;
+  }
+  .price-line span.lbl { color: var(--text-lo); }
+
+  .curve-wrap { margin: 16px 0 4px; }
+  .curve-caption {
+    font-size: 10.5px;
+    color: var(--text-lo);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  .addr-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 14px;
+  }
+  .addr-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    border-top: 1px solid var(--line);
+    padding: 10px 0;
+    flex-wrap: wrap;
+  }
+  .addr-item .role { color: var(--text-lo); flex-basis: 100%; font-size: 11px; }
+  .addr-item a { color: var(--text-hi); text-decoration: none; font-size: 12px; }
+  .addr-item a:hover { color: var(--accent); }
+  .addr-item .copy {
+    background: var(--card-soft);
+    border: none;
+    color: var(--text-lo);
+    font-size: 14px;
+    min-width: 30px;
+    min-height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .addr-item .copy:hover { color: var(--accent); background: var(--accent-soft); }
+
+  .footer-note {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-lo);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 18px;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  header, .card { animation: rise 0.4s ease both; }
+  .pool { animation-delay: 0.05s; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  @media (min-width: 461px) {
+    body { padding-top: 48px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="logo">A</div>
+      <div class="brand-text">
+        <h1>Arc Simple Swap</h1>
+        <div class="sub">testnet · by otisdefi</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
+      <span id="networkChip" class="chip warn"><span class="dot"></span> not connected</span>
+      <button id="connectBtn">Connect wallet</button>
+    </div>
+  </header>
+
+  <div class="disclosure">
+    <span>⚠</span>
+    <span><strong>Unaudited demo contract.</strong> Educational/demo purposes on Arc Testnet only — not audited, not for mainnet or real funds.</span>
+  </div>
+
+  <!-- Swap card -->
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" id="tabAB">TKA → TKB</button>
+      <button class="tab" id="tabBA">TKB → TKA</button>
+    </div>
+
+    <div class="field">
+      <div class="field-top">
+        <span class="label">You pay</span>
+        <button id="maxBtn">MAX</button>
+      </div>
+      <div class="field-row">
+        <input id="amountIn" type="text" inputmode="decimal" placeholder="0.0" autocomplete="off" />
+        <span class="token-tag" id="inTag">TKA</span>
+      </div>
+    </div>
+
+    <div class="swap-arrow"><span>↓</span></div>
+
+    <div class="field">
+      <div class="field-top">
+        <span class="label">You receive</span>
+      </div>
+      <div class="field-row">
+        <span class="val" id="amountOut">0.0</span>
+        <span class="token-tag" id="outTag">TKB</span>
+      </div>
+    </div>
+
+    <div class="fee-note">
+      <span>Pool fee 0.30%</span>
+      <span>Balance: <span id="balanceLine">—</span></span>
+    </div>
+
+    <button id="actionBtn" disabled>Connect wallet</button>
+    <div class="status-line" id="statusLine"></div>
+
+    <div class="card-footnote">
+      <b>SimpleSwap</b> 0x56Ee3AD055121CD74d28fCc05B1e0dB4257936C7<br/>
+      Two-token constant-product (x·y=k) pool. Testnet demo only.
+    </div>
+  </div>
+
+  <!-- Pool card -->
+  <div class="card pool">
+    <h2>Pool status</h2>
+
+    <div class="reserve-bar">
+      <div class="segA" id="segA" style="width:50%"></div>
+      <div class="segB" id="segB" style="width:50%"></div>
+    </div>
+    <div class="reserve-labels">
+      <span class="a" id="reserveALabel">— TKA</span>
+      <span class="b" id="reserveBLabel">— TKB</span>
+    </div>
+
+    <div class="price-line"><span class="lbl">1 TKA ≈</span> <span id="priceAB">—</span> <span class="lbl">TKB</span></div>
+    <div class="price-line"><span class="lbl">1 TKB ≈</span> <span id="priceBA">—</span> <span class="lbl">TKA</span></div>
+
+    <div class="curve-wrap">
+      <svg id="curveSvg" viewBox="0 0 260 150" width="100%" height="140"></svg>
+      <div class="curve-caption">Pool's current position on the x·y=k curve (indigo), and the projected result of your trade (mint).</div>
+    </div>
+
+    <div class="addr-list">
+      <div class="addr-item">
+        <span class="role">TokenA (TKA)</span>
+        <a href="https://testnet.arcscan.app/address/0xf82C2704053b4db27Dbb213Ff271A819cA1E2910" target="_blank" rel="noopener">0xf82C…E2910</a>
+        <button class="copy" data-copy="0xf82C2704053b4db27Dbb213Ff271A819cA1E2910">⧉</button>
+      </div>
+      <div class="addr-item">
+        <span class="role">TokenB (TKB)</span>
+        <a href="https://testnet.arcscan.app/address/0xEA92710a0Ab738dEFaadbb307af9641A5cE2C493" target="_blank" rel="noopener">0xEA92…2C493</a>
+        <button class="copy" data-copy="0xEA92710a0Ab738dEFaadbb307af9641A5cE2C493">⧉</button>
+      </div>
+      <div class="addr-item">
+        <span class="role">SimpleSwap</span>
+        <a href="https://testnet.arcscan.app/address/0x56Ee3AD055121CD74d28fCc05B1e0dB4257936C7" target="_blank" rel="noopener">0x56Ee…36C7</a>
+        <button class="copy" data-copy="0x56Ee3AD055121CD74d28fCc05B1e0dB4257936C7">⧉</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Arc Testnet · chain 5042002</div>
+</div>
+
+<script>
+(function () {
+  const TOKEN_A = "0xf82C2704053b4db27Dbb213Ff271A819cA1E2910";
+  const TOKEN_B = "0xEA92710a0Ab738dEFaadbb307af9641A5cE2C493";
+  const SWAP = "0x56Ee3AD055121CD74d28fCc05B1e0dB4257936C7";
+  const CHAIN_ID_HEX = "0x4cef52"; // 5042002
+  const CHAIN_PARAMS = {
+    chainId: CHAIN_ID_HEX,
+    chainName: "Arc Testnet",
+    nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
+    rpcUrls: ["https://5042002.rpc.thirdweb.com"],
+    blockExplorerUrls: ["https://testnet.arcscan.app"]
+  };
+  const FEE_BPS = 30n;
+  const BPS = 10000n;
+
+  const ERC20_ABI = [
+    "function balanceOf(address) view returns (uint256)",
+    "function approve(address,uint256) returns (bool)",
+    "function allowance(address,address) view returns (uint256)",
+    "function symbol() view returns (string)"
+  ];
+  const SWAP_ABI = [
+    "function reserveA() view returns (uint256)",
+    "function reserveB() view returns (uint256)",
+    "function swapAForB(uint256,uint256) returns (uint256)",
+    "function swapBForA(uint256,uint256) returns (uint256)"
+  ];
+
+  let provider, signer, userAddress;
+  let direction = "AB"; // AB = TKA->TKB, BA = TKB->TKA
+  let reserveA = 0n, reserveB = 0n;
+  let balanceIn = 0n, allowanceIn = 0n;
+
+  const el = (id) => document.getElementById(id);
+  const connectBtn = el("connectBtn");
+  const networkChip = el("networkChip");
+  const tabAB = el("tabAB"), tabBA = el("tabBA");
+  const amountIn = el("amountIn");
+  const amountOut = el("amountOut");
+  const inTag = el("inTag"), outTag = el("outTag");
+  const balanceLine = el("balanceLine");
+  const actionBtn = el("actionBtn");
+  const statusLine = el("statusLine");
+  const maxBtn = el("maxBtn");
+
+  function fmt(bn, decimals = 18, maxFrac = 4) {
+    const s = ethers.utils.formatUnits(bn, decimals);
+    const num = parseFloat(s);
+    if (isNaN(num)) return "0";
+    return num.toLocaleString("en-US", { maximumFractionDigits: maxFrac });
+  }
+
+  function parseInput(str) {
+    if (!str) return 0n;
+    try {
+      return ethers.utils.parseUnits(str, 18);
+    } catch (e) {
+      return 0n;
+    }
+  }
+
+  function setStatus(msg, kind) {
+    statusLine.textContent = msg || "";
+    statusLine.className = "status-line" + (kind ? " " + kind : "");
+  }
+
+  function tokenInAddr() { return direction === "AB" ? TOKEN_A : TOKEN_B; }
+  function tokenOutAddr() { return direction === "AB" ? TOKEN_B : TOKEN_A; }
+
+  function getAmountOut(amtIn, resIn, resOut) {
+    if (resIn === 0n || resOut === 0n || amtIn === 0n) return 0n;
+    const amtInWithFee = amtIn * (BPS - FEE_BPS);
+    const numerator = amtInWithFee * resOut;
+    const denominator = resIn * BPS + amtInWithFee;
+    return numerator / denominator;
+  }
+
+  function updateTabsUI() {
+    tabAB.classList.toggle("active", direction === "AB");
+    tabBA.classList.toggle("active", direction === "BA");
+    inTag.textContent = direction === "AB" ? "TKA" : "TKB";
+    outTag.textContent = direction === "AB" ? "TKB" : "TKA";
+  }
+
+  function drawCurve(previewAmtIn, previewAmtOut) {
+    const svg = el("curveSvg");
+    const resIn = direction === "AB" ? reserveA : reserveB;
+    const resOut = direction === "AB" ? reserveB : reserveA;
+    const xIn = parseFloat(ethers.utils.formatUnits(resIn, 18)) || 1;
+    const yIn = parseFloat(ethers.utils.formatUnits(resOut, 18)) || 1;
+    const k = xIn * yIn;
+
+    const pad = 24;
+    const W = 260, H = 150;
+    const xMax = xIn * 2.4 || 10;
+    const yMax = k / (xMax * 0.15) || 10;
+
+    function toSvgX(x) { return pad + (x / xMax) * (W - pad * 1.4); }
+    function toSvgY(y) { return H - pad - (y / yMax) * (H - pad * 1.6); }
+
+    let path = "";
+    const steps = 40;
+    for (let i = 1; i <= steps; i++) {
+      const x = (xMax * 0.06) + (i / steps) * (xMax * 0.94);
+      const y = k / x;
+      const px = toSvgX(x), py = toSvgY(y);
+      path += (i === 1 ? "M" : "L") + px.toFixed(1) + "," + py.toFixed(1) + " ";
+    }
+
+    const curPx = toSvgX(xIn), curPy = toSvgY(yIn);
+
+    let previewMarker = "";
+    if (previewAmtIn && previewAmtIn > 0n) {
+      const newX = xIn + parseFloat(ethers.utils.formatUnits(previewAmtIn, 18));
+      const newY = yIn - parseFloat(ethers.utils.formatUnits(previewAmtOut, 18));
+      const px = toSvgX(newX), py = toSvgY(Math.max(newY, 0.0001));
+      previewMarker = `<circle cx="${px}" cy="${py}" r="4.5" fill="#12B79E" stroke="#FFFFFF" stroke-width="1.5"/>`;
+    }
+
+    svg.innerHTML = `
+      <path d="${path}" fill="none" stroke="#5B5FEF" stroke-width="1.6" opacity="0.85"/>
+      <line x1="${pad}" y1="${H-pad}" x2="${W-8}" y2="${H-pad}" stroke="#E7E9ED" stroke-width="1"/>
+      <line x1="${pad}" y1="8" x2="${pad}" y2="${H-pad}" stroke="#E7E9ED" stroke-width="1"/>
+      <circle cx="${curPx}" cy="${curPy}" r="5" fill="#5B5FEF" stroke="#FFFFFF" stroke-width="1.5"/>
+      ${previewMarker}
+    `;
+  }
+
+  function updatePoolPanel() {
+    const totalNum = parseFloat(ethers.utils.formatUnits(reserveA, 18)) + parseFloat(ethers.utils.formatUnits(reserveB, 18));
+    const pctA = totalNum > 0 ? (parseFloat(ethers.utils.formatUnits(reserveA, 18)) / totalNum) * 100 : 50;
+    el("segA").style.width = pctA + "%";
+    el("segB").style.width = (100 - pctA) + "%";
+    el("reserveALabel").textContent = fmt(reserveA) + " TKA";
+    el("reserveBLabel").textContent = fmt(reserveB) + " TKB";
+
+    if (reserveA > 0n && reserveB > 0n) {
+      const priceAB = getAmountOut(ethers.utils.parseUnits("1", 18), reserveA, reserveB);
+      const p    font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
