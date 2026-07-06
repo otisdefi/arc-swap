@@ -117,17 +117,18 @@
   #connectBtn {
     border: none;
     border-radius: 999px;
-    padding: 10px 16px;
+    padding: 10px 18px;
     font-size: 13px;
     font-weight: 600;
     background: var(--accent);
     color: #fff;
     cursor: pointer;
-    transition: background 0.15s ease, transform 0.1s ease;
+    box-shadow: 0 2px 8px rgba(91,95,239,0.28);
+    transition: background 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
   }
-  #connectBtn:hover:not(:disabled) { background: var(--accent-hover); }
-  #connectBtn:active:not(:disabled) { transform: scale(0.97); }
-  #connectBtn:disabled { background: var(--accent-soft); color: var(--accent); cursor: default; }
+  #connectBtn:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 4px 12px rgba(91,95,239,0.34); }
+  #connectBtn:active:not(:disabled) { transform: scale(0.96); box-shadow: 0 1px 4px rgba(91,95,239,0.24); }
+  #connectBtn:disabled { background: var(--accent-soft); color: var(--accent); cursor: default; box-shadow: none; }
 
   /* Disclosure banner */
   .disclosure {
@@ -174,21 +175,27 @@
     border-radius: 999px;
     font-family: 'IBM Plex Mono', monospace;
     cursor: pointer;
-    transition: background 0.18s, color 0.18s;
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   }
+  .tab:hover:not(.active) { color: var(--text-hi); }
   .tab.active {
     background: var(--text-hi);
     color: #fff;
+    box-shadow: 0 2px 6px rgba(20,22,26,0.15);
   }
 
   .field {
     background: var(--card-soft);
-    border: 1px solid transparent;
+    border: 1.5px solid transparent;
     border-radius: var(--radius-md);
     padding: 14px;
-    transition: border-color 0.15s;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
   }
-  .field:focus-within { border-color: var(--accent); }
+  .field:focus-within {
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
 
   .field-top {
     display: flex;
@@ -202,15 +209,18 @@
     font-weight: 600;
   }
   .field-top button {
-    background: none;
+    background: var(--accent-soft);
     border: none;
     color: var(--accent);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     font-weight: 700;
-    padding: 4px 6px;
+    padding: 4px 9px;
+    border-radius: 999px;
     cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
   }
+  .field-top button:hover { background: var(--accent); color: #fff; }
 
   .field-row {
     display: flex;
@@ -250,6 +260,7 @@
     padding: 7px 12px;
     border-radius: 999px;
     flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(20,22,26,0.04);
   }
 
   .swap-arrow {
@@ -269,6 +280,11 @@
     font-size: 15px;
     font-weight: 700;
     box-shadow: 0 1px 3px rgba(20,22,26,0.08);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .swap-arrow span:hover {
+    transform: scale(1.08) rotate(6deg);
+    box-shadow: 0 3px 8px rgba(20,22,26,0.12);
   }
 
   .fee-note {
@@ -280,7 +296,7 @@
     justify-content: space-between;
   }
 
-  #actionBtn {
+  #actionBtn, .primary-btn {
     width: 100%;
     padding: 15px;
     border-radius: var(--radius-md);
@@ -290,12 +306,63 @@
     background: var(--accent);
     color: #fff;
     cursor: pointer;
-    transition: background 0.15s ease, transform 0.08s ease, opacity 0.15s;
+    box-shadow: 0 4px 14px rgba(91,95,239,0.25);
+    transition: background 0.18s ease, transform 0.1s ease, box-shadow 0.18s ease;
     min-height: 52px;
   }
-  #actionBtn:hover:not(:disabled) { background: var(--accent-hover); }
-  #actionBtn:active:not(:disabled) { transform: scale(0.98); }
-  #actionBtn:disabled { background: var(--card-soft); color: #B6BAC3; cursor: not-allowed; }
+  #actionBtn:hover:not(:disabled), .primary-btn:hover:not(:disabled) {
+    background: var(--accent-hover);
+    box-shadow: 0 6px 18px rgba(91,95,239,0.32);
+  }
+  #actionBtn:active:not(:disabled), .primary-btn:active:not(:disabled) {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(91,95,239,0.22);
+  }
+  #actionBtn:disabled, .primary-btn:disabled {
+    background: var(--card-soft);
+    color: #B6BAC3;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* Liquidity card */
+  .pct-row {
+    display: flex;
+    gap: 6px;
+    margin: 10px 0 4px;
+  }
+  .pct-btn {
+    flex: 1;
+    border: 1.5px solid var(--line);
+    background: #fff;
+    color: var(--text-lo);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 4px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  }
+  .pct-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .pct-btn.active { border-color: var(--accent); color: #fff; background: var(--accent); }
+
+  .liq-plus {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0;
+    color: var(--text-lo);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .liq-note {
+    font-size: 11.5px;
+    color: var(--text-lo);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
 
   .status-line {
     margin-top: 10px;
@@ -398,10 +465,259 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease, transform 0.1s ease;
   }
   .addr-item .copy:hover { color: var(--accent); background: var(--accent-soft); }
+  .addr-item .copy:active { transform: scale(0.92); }
 
   .footer-note {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-lo);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 18px;
+  }
+
+  /* History card */
+  .history h2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ghost-btn {
+    background: var(--card-soft);
+    border: none;
+    color: var(--text-lo);
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.4s ease, background 0.15s;
+  }
+  .ghost-btn:hover { background: var(--accent-soft); color: var(--accent); }
+  .ghost-btn:active { transform: scale(0.92); }
+  .ghost-btn.spin { animation: spin 0.7s linear; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hist-empty, .hist-loading {
+    font-size: 12.5px;
+    color: var(--text-lo);
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 10px 2px;
+    line-height: 1.6;
+  }
+
+  .hist-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 11px 0;
+    border-top: 1px solid var(--line);
+  }
+  .hist-row:first-child { border-top: none; }
+
+  .hist-left { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+  .hist-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+  .hist-badge.swap { color: var(--accent); background: var(--accent-soft); }
+  .hist-badge.add { color: var(--mint); background: var(--mint-soft); }
+  .hist-badge.remove { color: var(--red); background: var(--red-soft); }
+
+  .hist-amounts {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text-hi);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .hist-block {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-lo);
+  }
+
+  .hist-link {
+    flex-shrink: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .hist-link:hover { background: var(--accent); color: #fff; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  header, .card { animation: rise 0.4s ease both; }
+  .pool { animation-delay: 0.05s; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  @media (min-width: 461px) {
+    body { padding-top: 48px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="logo">A</div>
+      <div class="brand-text">
+        <h1>Arc Simple Swap</h1>
+        <div class="sub">testnet · by otisdefi</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
+      <span id="networkChip" class="chip warn"><span class="dot"></span> not connected</span>
+      <button id="connectBtn">Connect wallet</button>
+    </div>
+  </header>
+
+  <div class="disclosure">
+    <span>⚠</span>
+    <span><strong>Unaudited demo contract.</strong> Educational/demo purposes on Arc Testnet only — not audited, not for mainnet or real funds.</span>
+  </div>
+
+  <!-- Swap card -->
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" id="tabAB">TKA → TKB</button>
+      <button class="tab" id="tabBA">TKB → TKA</button>
+    </div>
+
+    <div class="field">
+      <div class="field-top">
+        <span class="label">You pay</span>
+        <button id="maxBtn">MAX</button>
+      </div>
+      <div class="field-row">
+        <input id="amountIn" type="text" inputmode="decimal" placeholder="0.0" autocomplete="off" />
+        <span class="token-tag" id="inTag">TKA</span>
+      </div>
+    </div>
+
+    <div class="swap-arrow"><span>↓</span></div>
+
+    <div class="field">
+      <div class="field-top">
+        <span class="label">You receive</span>
+      </div>
+      <div class="field-row">
+        <span class="val" id="amountOut">0.0</span>
+        <span class="token-tag" id="outTag">TKB</span>
+      </div>
+    </div>
+
+    <div class="fee-note">
+      <span>Pool fee 0.30%</span>
+      <span>Balance: <span id="balanceLine">—</span></span>
+    </div>
+
+    <button id="actionBtn" disabled>Connect wallet</button>
+    <div class="status-line" id="statusLine"></div>
+
+    <div class="card-footnote">
+      <b>SimpleSwap</b> 0x56Ee3AD055121CD74d28fCc05B1e0dB4257936C7<br/>
+      Two-token constant-product (x·y=k) pool. Testnet demo only.
+    </div>
+  </div>
+
+  <!-- Pool card -->
+  <div class="card pool">
+    <h2>Pool status</h2>
+
+    <div class="reserve-bar">
+      <div class="segA" id="segA" style="width:50%"></div>
+      <div class="segB" id="segB" style="width:50%"></div>
+    </div>
+    <div class="reserve-labels">
+      <span class="a" id="reserveALabel">— TKA</span>
+      <span class="b" id="reserveBLabel">— TKB</span>
+    </div>
+
+    <div class="price-line"><span class="lbl">1 TKA ≈</span> <span id="priceAB">—</span> <span class="lbl">TKB</span></div>
+    <div class="price-line"><span class="lbl">1 TKB ≈</span> <span id="priceBA">—</span> <span class="lbl">TKA</span></div>
+
+    <div class="curve-wrap">
+      <svg id="curveSvg" viewBox="0 0 260 150" width="100%" height="140"></svg>
+      <div class="curve-caption">Pool's current position on the x·y=k curve (indigo), and the projected result of your trade (mint).</div>
+    </div>
+
+    <div class="addr-list">
+      <div class="addr-item">
+        <span class="role">TokenA (TKA)</span>
+        <a href="https://testnet.arcscan.app/address/0xf82C2704053b4db27Dbb213Ff271A819cA1E2910" target="_blank" rel="noopener">0xf82C…E2910</a>
+        <button class="copy" data-copy="0xf82C2704053b4db27Dbb213Ff271A819cA1E2910">⧉</button>
+      </div>
+      <div class="addr-item">
+        <span class="role">TokenB (TKB)</span>
+        <a href="https://testnet.arcscan.app/address/0xEA92710a0Ab738dEFaadbb307af9641A5cE2C493" target="_blank" rel="noopener">0xEA92…2C493</a>
+        <button class="copy" data-copy="0xEA92710a0Ab738dEFaadbb307af9641A5cE2C493">⧉</button>
+      </div>
+      <div class="addr-item">
+        <span class="role">SimpleSwap</span>
+        <a href="https://testnet.arcscan.app/address/0x56Ee3AD055121CD74d28fCc05B1e0dB4257936C7" target="_blank" rel="noopener">0x56Ee…36C7</a>
+        <button class="copy" data-copy="0x56Ee3AD055121CD74d28fCc05B1e0dB4257936C7">⧉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liquidity card -->
+  <div class="card liquidity">
+    <div class="tabs">
+      <button class="tab active" id="liqTabAdd">Add liquidity</button>
+      <button class="tab" id="liqTabRemove">Remove liquidity</button>
+    </div>
+
+    <!-- Add panel -->
+    <div id="liqAddPanel">
+      <div class="field">
+        <div class="field-top">
+          <span class="label">TKA amount</span>
+          <button id="liqMaxA">MAX</button>
+        </div>
+        <div class="field-row">
+          <input id="liqAmountA" type="text" inputmode="decimal" placeholder="0.0" autocomplete="off" />
+          <span class="token-tag">TKA</span>
+        </div>
+      </div>
+
+      <div class="liq-plus">+</div>
+
+      <div class="field">
+        <div class="field-top">
+          <span class="label">TKB amount</span>
+          <button id="liqMaxB">MAX</button>
+        </div>
+        <div class="field-row">
+          <input id="liqAmountB" type="text" inputmode="decimal" placeholder="0.0" autocomplete="off" />
+          <r-note {
     text-align: center;
     font-size: 11px;
     color: var(--text-lo);
