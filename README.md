@@ -1,4 +1,4 @@
-# Arc Swap
+# Otis-Arc-Swap
 
 A simple, constant-product (x·y=k) token swap and liquidity demo built natively on **Arc Testnet**. Includes a live AMM swap interface, liquidity add/remove, onchain activity history, and a light/dark theme — all in a single static page, no build step required.
 
