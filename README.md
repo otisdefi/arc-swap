@@ -1,4 +1,4 @@
-# Otis-Arc-Swap
+# Arc Swap
 
 A simple, constant-product (x·y=k) token swap and liquidity demo built natively on **Arc Testnet**. Includes a live AMM swap interface, liquidity add/remove, onchain activity history, and a light/dark theme — all in a single static page, no build step required.
 
@@ -53,6 +53,16 @@ To use the app, ensure your wallet is configured with the following network:
 ## Disclaimer
 
 This contract is for educational/demonstration purposes only and has not undergone an independent security audit. It should not be used on mainnet or with assets of real value.
+
+## Built With
+
+- [ethers.js](https://docs.ethers.org/v5/) (v5, via CDN)
+- Vanilla HTML / CSS / JavaScript — no build step, no framework
+- [Solidity](https://soliditylang.org/) (contracts)
+
+## License
+
+MIT License
 
 ---
 
