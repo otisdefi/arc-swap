@@ -1,4 +1,4 @@
-Arc Swap
+Arc Swap 
 A simple token swap (AMM) demo built on Arc Testnet, running on the x·y=k constant-product formula.
 Live demo: https://arc-swap-otisdefi.netlify.app
 Contracts (Arc Testnet, chain 5042002)
